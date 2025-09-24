@@ -1,0 +1,106 @@
+//// The MIT License (MIT)
+//
+// Copyright (c) Eclypses, Inc.
+//
+// All rights reserved.
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to deal
+// in the Software without restriction, including without limitation the rights
+// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+// SOFTWARE.
+
+
+import Foundation
+
+final class Transport: Transportable {
+
+    private var webSocketTask: URLSessionWebSocketTask?
+    var onMessage: ((ActionByte, UInt8, Data) -> Void)?
+    var urlString: String
+
+    // Track if socket is open
+    private(set) var isConnected = false
+
+    init(urlString: String) {
+        self.urlString = urlString
+    }
+
+    func connect() {
+        guard let url = URL(string: urlString) else { return }
+        let session = URLSession(configuration: .default)
+        webSocketTask = session.webSocketTask(with: url)
+        webSocketTask?.resume()
+        isConnected = true
+        receive()
+    }
+
+    func disconnect() {
+        webSocketTask?.cancel(with: .goingAway, reason: nil)
+        isConnected = false
+    }
+
+    func send(action: ActionByte, messageType: UInt8, payload: Data) {
+        guard isConnected, let task = webSocketTask else {
+            reportError(.transportError(reason: "WebSocket not connected"), self)
+            return
+        }
+
+        let messageData = Header.wrap(action: action, messageType: messageType, payload: payload)
+//        let headerLength = Header.protocolHeader.count + 3
+//        let headerBytes = [UInt8](messageData.prefix(headerLength))
+        task.send(.data(messageData)) { error in
+            if let error = error {
+                reportError(.transportError(reason: "Send error: \(error)"), self)
+                return
+            }
+        }
+    }
+
+    private func receive() {
+        guard let task = webSocketTask else { return }
+
+        task.receive { [weak self] result in
+            guard let self = self else { return }
+
+            switch result {
+            case .failure(let error):
+                reportError(.transportError(reason: "Receive error: \(error)"), self)
+                self.isConnected = false
+                return // stop looping on error
+
+            case .success(let message):
+                switch message {
+                case .data(let data):
+//                    let headerLength = Header.protocolHeader.count + 3
+//                    let headerBytes = [UInt8](data.prefix(headerLength))
+                    if let (action, messageType, payload) = Header.unwrap(data) {
+                        self.onMessage?(action, messageType, payload)
+                    }
+                case .string(let text):
+                    let payload = Data(text.utf8)
+                    self.onMessage?(.proxyData, 0, payload)
+                @unknown default:
+                    break
+                }
+            }
+
+            // Continue receiving only if still connected
+            if self.isConnected {
+                self.receive()
+            }
+        }
+    }
+}
