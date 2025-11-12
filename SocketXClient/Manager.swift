@@ -158,21 +158,17 @@ final class Manager {
     private func sendHello() {
         transport.send(action: .request, messageType: 254, payload: Data())
         pairingState = .sentHello
-        debugLog("→ Sent hello (action=0)", self, function: #function)
     }
     
     private func handleHandshake(action: ActionByte, payload: Data) {
         switch (pairingState, action) {
         case (.sentHello, .response):
-            debugLog("← Received ack (action=1)", self, function: #function)
             initiateKyberPairing()
             
         case (.awaitingPairResponse, .pairResponse):
-            debugLog("← Received pair response (action=3)", self, function : #function)
             handlePairResponsePayload(payload)
             
         case (.sentEncryptedPath, .upstreamConnectionResponse):
-            debugLog("← Received upstream connection response (action=5) — paired", self, function : #function)
             pairingState = .paired
             onPaired?()
             
@@ -188,7 +184,6 @@ final class Manager {
             let payload = self?.codec.getPairingKeys()
             
             self?.pairingState = .awaitingPairResponse
-            debugLog("→ Sent pair request (action=2)", self, function : #function)
             return payload ?? Data()
         }
     }
@@ -209,7 +204,6 @@ final class Manager {
             let payload = codec.encode(pathnameData)
             transport.send(action: .upstreamConnectionRequest, messageType: 254, payload: payload)
             pairingState = .sentEncryptedPath
-            debugLog("→ Sent encrypted room path (action=4)", self)
         } catch {
             throw error
         }
