@@ -59,8 +59,6 @@ final class Transport: Transportable {
         }
 
         let messageData = Header.wrap(action: action, messageType: messageType, payload: payload)
-//        let headerLength = Header.protocolHeader.count + 3
-//        let headerBytes = [UInt8](messageData.prefix(headerLength))
         task.send(.data(messageData)) { error in
             if let error = error {
                 reportError(.transportError(reason: "Send error: \(error)"), self)
@@ -84,8 +82,6 @@ final class Transport: Transportable {
             case .success(let message):
                 switch message {
                 case .data(let data):
-//                    let headerLength = Header.protocolHeader.count + 3
-//                    let headerBytes = [UInt8](data.prefix(headerLength))
                     if let (action, messageType, payload) = Header.unwrap(data) {
                         self.onMessage?(action, messageType, payload)
                     }

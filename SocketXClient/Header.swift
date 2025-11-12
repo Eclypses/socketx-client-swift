@@ -49,6 +49,7 @@ struct Header {
         payload: Data = Data()
     ) -> Data {
         var message = Data()
+        print("\n>>> Sending ...")
         message.append(contentsOf: protocolHeader)
         message.append(version)
         message.append(action.rawValue)
@@ -63,13 +64,12 @@ struct Header {
         guard data.prefix(protocolHeader.count) == Data(protocolHeader) else { return nil }
 
         // Extract fields
-        let version = data[protocolHeader.count] 
+        let version = data[protocolHeader.count]
         let actionByte = data[protocolHeader.count + 1]
         let messageType = data[protocolHeader.count + 2]
-
         let payload = data.dropFirst(protocolHeader.count + 3)
 
-        // Optionally verify version
+        // Verify version
         guard version == version else {
             reportError(.transportError(reason: "Version mismatch in header: got \(version), expected \(Self.version)"), self)
             return nil

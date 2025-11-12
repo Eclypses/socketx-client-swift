@@ -23,7 +23,7 @@
 // SOFTWARE.
 
 import Foundation
-import Kyber // adjust import to whatever your actual Kyber module is
+import Kyber
 
 final class Manager {
     
@@ -85,17 +85,12 @@ final class Manager {
     static func captureRoomPath(_ urlString: String) -> (String, String) {
         let basePath = "/ws"
         
-        // Find the "/ws" segment
         guard let wsRange = urlString.range(of: basePath) else {
-            // Unexpected, just return original string with no roomPath
             return (urlString, "")
         }
         
-        // Everything after "/ws" is the roomPath
         let afterWs = urlString[wsRange.upperBound...]
         let roomPath = afterWs.isEmpty ? "" : String(afterWs)
-        
-        // Base URL is everything up to "/ws"
         let baseUrlString = String(urlString[..<wsRange.upperBound])
         
         return (baseUrlString, roomPath)
@@ -182,19 +177,16 @@ final class Manager {
             onPaired?()
             
         default:
-            
             reportError(.handshakeError(reason: "Unexpected handshake message: state=\(pairingState), action=\(action)"), self)
         }
     }
     
     // MARK: - KYBER + Pairing helpers
     
-    /// Initiate Kyber pairing: create keypairs and send a pairRequest (action=2)
     private func initiateKyberPairing() {
         sendSafe(action: .pairRequest, messageType: 254) { [weak self] in
             let payload = self?.codec.getPairingKeys()
             
-            // Update state after successful send
             self?.pairingState = .awaitingPairResponse
             debugLog("→ Sent pair request (action=2)", self, function : #function)
             return payload ?? Data()
@@ -225,7 +217,6 @@ final class Manager {
     
     // MARK: - Helpers
     
-    /// Attempts to create a payload via `payloadProvider`, sends it, and handles thrown errors locally.
     private func sendSafe(action: ActionByte, messageType: UInt8, payloadProvider: () throws -> Data) {
         do {
             let payload = try payloadProvider()
