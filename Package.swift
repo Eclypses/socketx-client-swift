@@ -2,7 +2,7 @@
 
 import PackageDescription
 
-// SocketXClient Package Version: 1.0.0
+// SocketXClient Package Version: 1.0.1
 // Mte Version: 4.1.0
 
 let package = Package(

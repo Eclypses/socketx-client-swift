@@ -27,7 +27,7 @@ import Foundation
 
 actor Settings {
     
-    static let socketXClientVersion = "1.0.0"
+    static let socketXClientVersion = "1.0.1"
     
     static let licCompanyName: String = "Eclypses Inc"
     static let licCompanyKey: String = "9eHOohOm/GwY01xbvNTL9B+1"
