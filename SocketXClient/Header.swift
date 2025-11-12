@@ -49,7 +49,6 @@ struct Header {
         payload: Data = Data()
     ) -> Data {
         var message = Data()
-        print("\n>>> Sending ...")
         message.append(contentsOf: protocolHeader)
         message.append(version)
         message.append(action.rawValue)
