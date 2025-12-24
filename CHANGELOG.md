@@ -4,6 +4,8 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2.0.0] - 2025-12-23
+
 ### Added
     - Support for Dependency Injection via `init(task: URLSessionWebSocketTask)`.
     - Added `release.sh` script to automate versioning, tagging, and changelog updates.
@@ -42,3 +44,5 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 
 
+
+[2.0.0]: https://github.com/Eclypses/socketx-client-swift/releases/tag/v2.0.0
