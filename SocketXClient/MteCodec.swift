@@ -105,7 +105,7 @@ final class MteCodec: MteEntropyCallback, MteNonceCallback {
         let status = encoder.instantiate(encPersStr)
         try checkMteStatus(function: #function, status: status)
         // Uncomment to confirm encoder state value and and compare with Server decoder state. This is a particularly useful debugging tool.
-        //                        print("Encoder initial state: \(encoder.saveStateB64()!)")
+//                                print("Encoder initial state: \(encoder.saveStateB64()!)")
     }
     
     func instantiateDecoder() throws {
@@ -116,7 +116,7 @@ final class MteCodec: MteEntropyCallback, MteNonceCallback {
         let status = decoder.instantiate(decPersStr)
         try checkMteStatus(function: #function, status: status)
         // Uncomment to confirm decoder state value and and compare with Server encoder state. This is a particularly useful debugging tool.
-        //                debugPrint("Decoder initial state: \(decoder.saveStateB64()!)")
+//                        debugPrint("Decoder initial state: \(decoder.saveStateB64()!)")
     }
     
     func encode(_ data: Data) -> Data {
