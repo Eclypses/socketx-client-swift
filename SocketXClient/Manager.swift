@@ -53,14 +53,19 @@ final class Manager {
     var onMessageReceived: ((String) -> Void)?
     var onBinaryReceived: ((Data) -> Void)?
     
-    init(urlString: String) {
+    // MARK: - Initializer
+    
+    init(task: URLSessionWebSocketTask) {
         
+        // Extract roomPath from the task's original request URL
+        if let originalUrl = task.originalRequest?.url?.absoluteString {
+            self.roomPath = Self.extractRoomPath(from: originalUrl)
+        } else {
+            self.roomPath = ""
+        }
         
-        // extract roomPath, if any, and store in roomPath variable for later use.
-        let (baseUrlString, roomPath) = Self.captureRoomPath(urlString)
-        self.roomPath = roomPath
-        
-        self.transport = Transport(urlString: baseUrlString)
+        // Initialize Transport with the existing Task
+        self.transport = Transport(task: task)
         self.codec = MteCodec()
         
         // Wire transport messages through codec / handshake
@@ -80,20 +85,19 @@ final class Manager {
         }
     }
     
-    /// Splits the base websocket URL and extracts the optional room path.
-    /// Returns (baseUrlString, roomPath)
-    static func captureRoomPath(_ urlString: String) -> (String, String) {
-        let basePath = "/ws"
-        
-        guard let wsRange = urlString.range(of: basePath) else {
-            return (urlString, "")
+    /// Helper to extract room path (path + query) from the URL found in the Task.
+    private static func extractRoomPath(from urlString: String) -> String {
+        guard let components = URLComponents(string: urlString) else {
+            return ""
         }
         
-        let afterWs = urlString[wsRange.upperBound...]
-        let roomPath = afterWs.isEmpty ? "" : String(afterWs)
-        let baseUrlString = String(urlString[..<wsRange.upperBound])
+        let path = components.path
         
-        return (baseUrlString, roomPath)
+        // The query (e.g., "?token=123")
+        // We manually prepend "?" because URLComponents.query does not include it.
+        let query = components.query.map { "?\($0)" } ?? ""
+        
+        return path + query
     }
     
     // MARK: - Connection
@@ -104,13 +108,19 @@ final class Manager {
         DispatchQueue.global().async { [weak self] in
             guard let self = self else { return }
             
-            // Poll for WebSocketTransport's isConnected (simple and reliable)
-            while !(self.transport as? Transport)!.isConnected {
-                usleep(50_000) // 50ms
-            }
-            
-            DispatchQueue.main.async {
-                self.sendHello()
+            // Poll for WebSocketTransport's isConnected
+            // We cast to Transport to check the specific property
+            if let concreteTransport = self.transport as? Transport {
+                while !concreteTransport.isConnected {
+                    usleep(50_000) // 50ms
+                }
+                
+                DispatchQueue.main.async {
+                    self.sendHello()
+                }
+            } else {
+                // Fallback or error if Transport implementation changes
+                reportError(.internalError(reason: "Transport polling failed"), self)
             }
         }
     }
@@ -219,7 +229,5 @@ final class Manager {
             reportError(.handshakeError(reason: "Failed to prepare/send payload for action=\(action)"), self)
         }
     }
-    
 }
-
 

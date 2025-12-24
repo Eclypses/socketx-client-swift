@@ -27,39 +27,47 @@ import Foundation
 
 final class Transport: Transportable {
 
-    private var webSocketTask: URLSessionWebSocketTask?
+    // Store the task directly. It is guaranteed to exist.
+    private let webSocketTask: URLSessionWebSocketTask
+    
     var onMessage: ((ActionByte, UInt8, Data) -> Void)?
-    var urlString: String
 
     // Track if socket is open
+    // This is read by Manager to know when to send the initial handshake.
     private(set) var isConnected = false
 
-    init(urlString: String) {
-        self.urlString = urlString
+    /// Initialize with an existing WebSocketTask.
+    /// The task is created by the customer's URLSession configuration.
+    init(task: URLSessionWebSocketTask) {
+        self.webSocketTask = task
     }
 
     func connect() {
-        guard let url = URL(string: urlString) else { return }
-        let session = URLSession(configuration: .default)
-        webSocketTask = session.webSocketTask(with: url)
-        webSocketTask?.resume()
+        // Resume the task (starts the connection if suspended)
+        webSocketTask.resume()
+        
+        // Mark as connected so Manager knows it can proceed with Handshake
         isConnected = true
+        
+        // Start the recursive receive loop
         receive()
     }
 
     func disconnect() {
-        webSocketTask?.cancel(with: .goingAway, reason: nil)
+        webSocketTask.cancel(with: .goingAway, reason: nil)
         isConnected = false
     }
 
     func send(action: ActionByte, messageType: UInt8, payload: Data) {
-        guard isConnected, let task = webSocketTask else {
+        guard isConnected else {
             reportError(.transportError(reason: "WebSocket not connected"), self)
             return
         }
 
+        // Wrap payload with MTE/SocketX headers
         let messageData = Header.wrap(action: action, messageType: messageType, payload: payload)
-        task.send(.data(messageData)) { error in
+        
+        webSocketTask.send(.data(messageData)) { error in
             if let error = error {
                 reportError(.transportError(reason: "Send error: \(error)"), self)
                 return
@@ -68,24 +76,26 @@ final class Transport: Transportable {
     }
 
     private func receive() {
-        guard let task = webSocketTask else { return }
-
-        task.receive { [weak self] result in
+        // Recursively listen for messages
+        webSocketTask.receive { [weak self] result in
             guard let self = self else { return }
 
             switch result {
             case .failure(let error):
+                // Report error and disconnect
                 reportError(.transportError(reason: "Receive error: \(error)"), self)
                 self.isConnected = false
-                return // stop looping on error
+                return // Stop recursion
 
             case .success(let message):
                 switch message {
                 case .data(let data):
+                    // Attempt to unwrap MTE headers
                     if let (action, messageType, payload) = Header.unwrap(data) {
                         self.onMessage?(action, messageType, payload)
                     }
                 case .string(let text):
+                    // Fallback for plain text frames (treated as Proxy Text)
                     let payload = Data(text.utf8)
                     self.onMessage?(.proxyData, 0, payload)
                 @unknown default:
