@@ -25,7 +25,6 @@
 import Foundation
 import Core
 
-
 final public class SocketXClient {
     
     // MARK: - Singleton reference
@@ -39,7 +38,11 @@ final public class SocketXClient {
     public var onBinaryReceived: ((Data) -> Void)?
     public var onError: ((SocketXError) -> Void)?
 
-    public init(url: String) throws {
+    // MARK: - Initializer
+
+    /// Initialize with an existing URLSessionWebSocketTask.
+    /// The customer creates this task using their custom URLSession.
+    public init(task: URLSessionWebSocketTask) throws {
         
         // Check MTE licensing
         guard MteBase.initLicense(Settings.licCompanyName, Settings.licCompanyKey) else {
@@ -48,11 +51,18 @@ final public class SocketXClient {
         }
         debugLog("Using iOS SocketXClient Version \(Settings.socketXClientVersion) and MTE Version \(MteBase.getVersion())")
         
-        self.manager = Manager(urlString: url)
+        // Initialize Manager with the task
+        self.manager = Manager(task: task)
         
         // Set the singleton reference
         SocketXClient.currentClient = self
 
+        setupCallbacks()
+    }
+
+    // MARK: - Private Setup
+
+    private func setupCallbacks() {
         self.manager.onMessageReceived = { [weak self] text in
             DispatchQueue.main.async {
                 self?.onMessageReceived?(text)
@@ -71,8 +81,10 @@ final public class SocketXClient {
         }
     }
 
+    // MARK: - Public Methods
+
     public func connect() {
-        manager.connect() 
+        manager.connect()
     }
 
     public func disconnect() {
@@ -86,32 +98,32 @@ final public class SocketXClient {
     public func send(binary data: Data) {
         manager.sendProxyData(binary: data)
     }
-    
 }
 
 // MARK: - Centralized error reporting
-    func reportError(_ error: SocketXError,
-                                   _ object: Any? = nil,
-                                   function: String = #function,
-                                   line: Int = #line) {
-        
-        
-        let reason: String
-        switch error {
-        case .networkError(let r) : reason = r
-        case .transportError(let r): reason = r
-        case .codecError(let r): reason = r
-        case .handshakeError(let r): reason = r
-        case .proxyError(let r):  reason = r
-        case .internalError(let r):   reason = r
-        case .unknown(let r):  reason = r
-        }
-        debugLog(reason, object, function: function, line: line)
-        DispatchQueue.main.async {
-            SocketXClient.currentClient?.onError?(error)
-        }
+// (Remains unchanged - see previous snippet)
+func reportError(_ error: SocketXError,
+                 _ object: Any? = nil,
+                 function: String = #function,
+                 line: Int = #line) {
+    
+    let reason: String
+    switch error {
+    case .networkError(let r) : reason = r
+    case .transportError(let r): reason = r
+    case .codecError(let r): reason = r
+    case .handshakeError(let r): reason = r
+    case .proxyError(let r):  reason = r
+    case .internalError(let r):   reason = r
+    case .unknown(let r):  reason = r
     }
+    debugLog(reason, object, function: function, line: line)
+    DispatchQueue.main.async {
+        SocketXClient.currentClient?.onError?(error)
+    }
+}
 
+// (debugLog and SocketXError remain unchanged)
 func debugLog(_ message: String,
               _ object: Any? = nil,
               function: String = #function,
