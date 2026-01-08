@@ -34,12 +34,21 @@ sed -i '' "s/\/\/ Version: .*/\/\/ Version: $CLEAN_VERSION/" "$PACKAGE_PATH"
 
 # 4. Update CHANGELOG.md Headers
 # Uses tags like [2.0.0] for headers
+# NOTE: Requires a '## [Unreleased]' section in your CHANGELOG.md to work.
 SEARCH="## \[Unreleased\]"
 REPLACE="## [Unreleased]\\
 \\
+### Added\\
+-\\
+\\
+### Changed\\
+-\\
+\\
+### Fixed\\
+-\\
+\\
+\\
 ## [$CLEAN_VERSION] - $DATE"
-
-sed -i '' "s/$SEARCH/$REPLACE/" "$CHANGELOG_PATH"
 
 # 5. Update CHANGELOG.md Reference Links
 # IMPORTANT: The URL must match the Git Tag (which now has 'v')
@@ -56,7 +65,7 @@ git add "$SETTINGS_PATH" "$PACKAGE_PATH" "$CHANGELOG_PATH"
 git commit -m "chore: bump version to $CLEAN_VERSION"
 
 echo "🏷️  Tagging version $TAG_VERSION..."
-git tag "$TAG_VERSION"
+git tag -a "$TAG_VERSION" -m "Release version $CLEAN_VERSION"
 
 echo "✅ Done! Validate the changes, then run:"
-echo "   git push && git push --tags"
+echo "   git push origin develop && git push origin $TAG_VERSION"
