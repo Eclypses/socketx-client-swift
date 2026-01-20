@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+- 
+
+### Changed
+- Edited README.md to provide very detailed implementation guidelines
+    
+### Removed
+- 
+
+
+## [2.0.1] - 2025-1-8
+
+### Added
 - Added dev_docs directory with library context and release steps
 
 ### Changed
@@ -12,8 +24,7 @@ All notable changes to this project will be documented in this file.
 - Updated azure-pipelines.yml to remove dev_docs directory and release.sh upon push to public GitHub.
     
 ### Removed
-    - Removed local-only notes file. Replacement is dev_docs/UPCOMING_UPDATED.md
-    
+    - Removed local-only notes file. Replacement is dev_docs/UPCOMING_UPDATED.md   
 
 ## [2.0.0] - 2025-12-23
 
