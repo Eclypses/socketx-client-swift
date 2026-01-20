@@ -5,10 +5,23 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+-
+
+### Changed
+-
+
+### Fixed
+-
+
+
+## [2.0.2] - 2026-01-20
+
+### Added
 - 
 
 ### Changed
 - Edited README.md to provide very detailed implementation guidelines
+- Edited release.sh to properly update the [Unreleased] section
     
 ### Removed
 - 
@@ -70,3 +83,5 @@ All notable changes to this project will be documented in this file.
 [2.0.0]: https://github.com/Eclypses/socketx-client-swift/releases/tag/v2.0.0
 
 [2.0.1]: https://github.com/Eclypses/socketx-client-swift/releases/tag/v2.0.1
+
+[2.0.2]: https://github.com/Eclypses/socketx-client-swift/releases/tag/v2.0.2
