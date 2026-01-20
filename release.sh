@@ -50,6 +50,8 @@ REPLACE="## [Unreleased]\\
 \\
 ## [$CLEAN_VERSION] - $DATE"
 
+sed -i '' "s/$SEARCH/$REPLACE/" "$CHANGELOG_PATH"
+
 # 5. Update CHANGELOG.md Reference Links
 # IMPORTANT: The URL must match the Git Tag (which now has 'v')
 # Link format: [2.0.0]: .../releases/tag/v2.0.0
