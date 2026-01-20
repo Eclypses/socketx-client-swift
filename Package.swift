@@ -2,7 +2,7 @@
 
 import PackageDescription
 
-// Version: 2.0.1
+// Version: 2.0.2
 // Mte Version: 4.1.0
 
 let package = Package(
