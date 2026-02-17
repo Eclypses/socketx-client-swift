@@ -5,13 +5,14 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
--
+- Added pipeline YAML lint step to fail fast on formatting/indentation errors in `azure-pipelines.yml`.
 
 ### Changed
--
+- Reworked CI test flow for iOS-only validation: simulator tests on `develop`/PRs and coverage-gated simulator tests on `master`.
 
 ### Fixed
--
+- Removed `@retroactive` from `String` LocalizedError conformance for Azure Swift toolchain compatibility.
+- Corrected `azure-pipelines.yml` indentation/formatting issues that caused Azure YAML parse failures.
 
 
 ## [2.1.1] - 2026-02-17
