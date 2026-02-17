@@ -59,6 +59,7 @@ steps:
       fi
 
       RESULT_BUNDLE="$(Build.SourcesDirectory)/test-results/SocketXClientCoverage.xcresult"
+      mkdir -p "$(Build.SourcesDirectory)/test-results"
       rm -rf "$RESULT_BUNDLE"
 
       xcodebuild test \
@@ -67,7 +68,16 @@ steps:
         -enableCodeCoverage YES \
         -resultBundlePath "$RESULT_BUNDLE"
 
-      COVERAGE=$(/usr/bin/xcrun xccov view --report "$RESULT_BUNDLE" | /usr/bin/awk '/^TOTAL/{gsub("%","",$4); print $4}')
+      XCCOV_REPORT=$(/usr/bin/xcrun xccov view --report "$RESULT_BUNDLE" || true)
+      echo "$XCCOV_REPORT"
+
+      COVERAGE=$(printf "%s\n" "$XCCOV_REPORT" | /usr/bin/awk '/^TOTAL/{for(i=1;i<=NF;i++){if($i ~ /%$/){gsub("%","",$i); print $i; exit}}}')
+
+      if [ -z "$COVERAGE" ]; then
+        COVERAGE=$(printf "%s\n" "$XCCOV_REPORT" | /usr/bin/awk 'match($0, /[0-9]+([.][0-9]+)?%/){v=substr($0, RSTART, RLENGTH)} END{if(v!=""){gsub("%","",v); print v}}')
+      fi
+
+      COVERAGE=$(printf "%s" "$COVERAGE" | /usr/bin/tr ',' '.')
       if [ -z "$COVERAGE" ]; then
         echo "Unable to parse total coverage from xccov output"
         exit 1
