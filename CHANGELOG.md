@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+-
+
+### Changed
+-
+
+### Fixed
+-
+
+
+## [2.1.2] - 2026-02-17
+
+### Added
 - Added pipeline YAML lint step to fail fast on formatting/indentation errors in `azure-pipelines.yml`.
 
 ### Changed
@@ -114,3 +126,5 @@ All notable changes to this project will be documented in this file.
 [2.1.0]: https://github.com/Eclypses/socketx-client-swift/releases/tag/v2.1.0
 
 [2.1.1]: https://github.com/Eclypses/socketx-client-swift/releases/tag/v2.1.1
+
+[2.1.2]: https://github.com/Eclypses/socketx-client-swift/releases/tag/v2.1.2
