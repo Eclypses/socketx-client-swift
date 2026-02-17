@@ -116,5 +116,21 @@ Configuration is minimal and handled via dependency injection:
 *   **WebSocket URL**: Room path is extracted from the task's URL (path + query).
 *   **Callbacks**: App sets `onConnected`, `onMessageReceived`, `onBinaryReceived`, `onError` closures.
 
+## 7. Testing & CI Notes
+The package is **iOS-only** and links an iOS-only MTE XCFramework. Because of this:
+* Use `xcodebuild test` with an **iOS Simulator** destination for local and CI test runs.
+* Do **not** rely on plain `swift test` on macOS host defaults for validation.
+
+Baseline layered tests are organized in `Tests/SocketXClientTests/` and include:
+* fake infrastructure (`FakeTransport`, `FakeManager`)
+* centralized fixtures
+* model/error tests
+* protocol contract tests
+* bridge callback boundary tests
+* facade/public API delegation tests
+* edge/throughput scenario tests
+
+See `dev_docs/TESTING_SUMMARY.md` for commands and suite details.
+
 ---
 This document provides concise technical context for the iOS SocketX Client library. For API usage examples, see README.md.

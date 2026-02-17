@@ -2,7 +2,7 @@
 
 import PackageDescription
 
-// Version: 2.0.2
+// Version: 2.1.2
 // Mte Version: 4.1.0
 
 let package = Package(
@@ -68,6 +68,13 @@ let package = Package(
             swiftSettings: [
                 .define("MTE_SWIFT_PACKAGE_MANAGER")
             ]
+        ),
+        .testTarget(
+            name: "SocketXClientTests",
+            dependencies: [
+                .target(name: "SocketXClient")
+            ],
+            path: "Tests/SocketXClientTests"
         ),
     ]
 )

@@ -25,7 +25,7 @@
 import Foundation
 import Kyber
 
-final class Manager {
+final class Manager: Managing {
     
     // MARK: - Types
     enum PairingState {

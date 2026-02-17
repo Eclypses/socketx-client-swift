@@ -14,6 +14,43 @@ All notable changes to this project will be documented in this file.
 -
 
 
+## [2.1.2] - 2026-02-17
+
+### Added
+- Added pipeline YAML lint step to fail fast on formatting/indentation errors in `azure-pipelines.yml`.
+
+### Changed
+- Reworked CI test flow for iOS-only validation: simulator tests on `develop`/PRs and coverage-gated simulator tests on `master`.
+
+### Fixed
+- Removed `@retroactive` from `String` LocalizedError conformance for Azure Swift toolchain compatibility.
+- Corrected `azure-pipelines.yml` indentation/formatting issues that caused Azure YAML parse failures.
+
+
+## [2.1.1] - 2026-02-17
+
+### Added
+-
+
+### Changed
+-
+
+### Fixed
+- Corrected formatting in azure-pipelines.yml
+
+
+## [2.1.0] - 2026-02-17
+
+### Added
+- Added testing suite with required coverage on merge to master
+
+### Changed
+- 
+
+### Fixed
+-
+
+
 ## [2.0.2] - 2026-01-20
 
 ### Added
@@ -85,3 +122,9 @@ All notable changes to this project will be documented in this file.
 [2.0.1]: https://github.com/Eclypses/socketx-client-swift/releases/tag/v2.0.1
 
 [2.0.2]: https://github.com/Eclypses/socketx-client-swift/releases/tag/v2.0.2
+
+[2.1.0]: https://github.com/Eclypses/socketx-client-swift/releases/tag/v2.1.0
+
+[2.1.1]: https://github.com/Eclypses/socketx-client-swift/releases/tag/v2.1.1
+
+[2.1.2]: https://github.com/Eclypses/socketx-client-swift/releases/tag/v2.1.2
