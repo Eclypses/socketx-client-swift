@@ -14,6 +14,20 @@ All notable changes to this project will be documented in this file.
 -
 
 
+## [2.1.3] - 2026-02-17
+
+### Added
+- Added `release.sh` git preflight safeguards to require a clean, synced `develop` before releasing.
+
+### Changed
+- Updated `release.sh` post-release push guidance to `git push origin develop $TAG_VERSION`.
+
+### Fixed
+- Hardened Azure coverage parsing in `azure-pipelines.yml` to handle differing `xccov` output formats and avoid false CI failures on `master` merges.
+- Prevented release-time branch divergence by blocking release runs when local `develop` is ahead/behind/diverged from `origin/develop`.
+- Added `release.sh` checks to fail on existing local/remote release tags before tagging.
+
+
 ## [2.1.2] - 2026-02-17
 
 ### Added
@@ -128,3 +142,5 @@ All notable changes to this project will be documented in this file.
 [2.1.1]: https://github.com/Eclypses/socketx-client-swift/releases/tag/v2.1.1
 
 [2.1.2]: https://github.com/Eclypses/socketx-client-swift/releases/tag/v2.1.2
+
+[2.1.3]: https://github.com/Eclypses/socketx-client-swift/releases/tag/v2.1.3
