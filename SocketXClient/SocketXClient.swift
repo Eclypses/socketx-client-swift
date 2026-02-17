@@ -25,12 +25,23 @@
 import Foundation
 import Core
 
+protocol Managing: AnyObject {
+    var onPaired: (() -> Void)? { get set }
+    var onMessageReceived: ((String) -> Void)? { get set }
+    var onBinaryReceived: ((Data) -> Void)? { get set }
+
+    func connect()
+    func disconnect()
+    func sendProxyData(text: String)
+    func sendProxyData(binary data: Data)
+}
+
 final public class SocketXClient {
     
     // MARK: - Singleton reference
     static weak var currentClient: SocketXClient?
 
-    private let manager: Manager!
+    private let manager: Managing
 
     // Public-facing closures
     public var onConnected: (() -> Void)?
@@ -57,6 +68,13 @@ final public class SocketXClient {
         // Set the singleton reference
         SocketXClient.currentClient = self
 
+        setupCallbacks()
+    }
+
+    /// Internal initializer to support deterministic unit tests with a fake manager.
+    init(manager: Managing) {
+        self.manager = manager
+        SocketXClient.currentClient = self
         setupCallbacks()
     }
 

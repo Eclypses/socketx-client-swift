@@ -69,5 +69,12 @@ let package = Package(
                 .define("MTE_SWIFT_PACKAGE_MANAGER")
             ]
         ),
+        .testTarget(
+            name: "SocketXClientTests",
+            dependencies: [
+                .target(name: "SocketXClient")
+            ],
+            path: "Tests/SocketXClientTests"
+        ),
     ]
 )

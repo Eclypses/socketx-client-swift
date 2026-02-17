@@ -5,10 +5,10 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
--
+- Added testing suite with required coverage on merge to master
 
 ### Changed
--
+- 
 
 ### Fixed
 -
