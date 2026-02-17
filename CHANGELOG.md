@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 
 ### Added
+-
+
+### Changed
+-
+
+### Fixed
+-
+
+
+## [2.1.3] - 2026-02-17
+
+### Added
 - Added `release.sh` git preflight safeguards to require a clean, synced `develop` before releasing.
 
 ### Changed
@@ -130,3 +142,5 @@ All notable changes to this project will be documented in this file.
 [2.1.1]: https://github.com/Eclypses/socketx-client-swift/releases/tag/v2.1.1
 
 [2.1.2]: https://github.com/Eclypses/socketx-client-swift/releases/tag/v2.1.2
+
+[2.1.3]: https://github.com/Eclypses/socketx-client-swift/releases/tag/v2.1.3
