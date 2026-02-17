@@ -1,155 +1,136 @@
-
-
 trigger:
-    branches:
-      include:
-        - develop
-        - master
+  branches:
+    include:
+      - develop
+      - master
 
 pr:
   branches:
     include:
       - master
-        
-variables:
-    packageName: 'socketx-client-swift'
-    packageDirectory: '$(Build.Repository.LocalPath)'
-  coverageThreshold: '70'
 
+variables:
+  packageName: 'socketx-client-swift'
+  packageDirectory: '$(Build.Repository.LocalPath)'
+  coverageThreshold: '70'
 
 pool: 'MacOS - Intel'
 
 steps:
+  - script: |
+      set -euo pipefail
+      ruby -e "require 'yaml'; YAML.load_file('azure-pipelines.yml'); puts 'azure-pipelines.yml syntax OK'"
+    displayName: 'Lint pipeline YAML'
 
-- script: |
-    set -euo pipefail
-    SCHEME=$(xcodebuild -list -json | /usr/bin/python3 -c 'import json,sys; d=json.load(sys.stdin); s=d.get("workspace",{}).get("schemes",[]) + d.get("project",{}).get("schemes",[]); pkg=[x for x in s if x.endswith("-Package")]; print(pkg[0] if pkg else (s[0] if s else ""))')
-    if [ -z "$SCHEME" ]; then
-      echo "Unable to determine Xcode scheme for package tests"
-      exit 1
-    fi
+  - script: |
+      set -euo pipefail
+      SCHEME=$(xcodebuild -list -json | /usr/bin/python3 -c 'import json,sys; d=json.load(sys.stdin); s=d.get("workspace",{}).get("schemes",[]) + d.get("project",{}).get("schemes",[]); pkg=[x for x in s if x.endswith("-Package")]; print(pkg[0] if pkg else (s[0] if s else ""))')
+      if [ -z "$SCHEME" ]; then
+        echo "Unable to determine Xcode scheme for package tests"
+        exit 1
+      fi
 
-    SIM_ID=$(xcrun simctl list devices available -j | /usr/bin/python3 -c 'import json,sys; d=json.load(sys.stdin).get("devices",{}); sims=[]
-for runtime, devs in d.items():
-  if "iOS" not in runtime:
-    continue
-  for dev in devs:
-    if dev.get("isAvailable"):
-      name=dev.get("name","")
-      udid=dev.get("udid","")
-      sims.append((0 if name.startswith("iPhone") else 1, name, udid))
-sims.sort(key=lambda x:(x[0], x[1]))
-print(sims[0][2] if sims else "")')
-    if [ -z "$SIM_ID" ]; then
-      echo "Unable to determine an available iOS Simulator device"
-      xcrun simctl list devices
-      exit 1
-    fi
+      SIM_ID=$(xcrun simctl list devices available -j | /usr/bin/python3 -c 'import json,sys; d=json.load(sys.stdin).get("devices",{}); sims=[(0 if dev.get("name","").startswith("iPhone") else 1, dev.get("name",""), dev.get("udid","")) for runtime,devs in d.items() if "iOS" in runtime for dev in devs if dev.get("isAvailable")]; sims.sort(key=lambda x:(x[0],x[1])); print(sims[0][2] if sims else "")')
+      if [ -z "$SIM_ID" ]; then
+        echo "Unable to determine an available iOS Simulator device"
+        xcrun simctl list devices
+        exit 1
+      fi
 
-    xcodebuild test \
-      -scheme "$SCHEME" \
-      -destination "id=$SIM_ID"
-  displayName: 'Run iOS Simulator tests (develop/pr)'
-  condition: and(succeeded(), ne(variables['Build.SourceBranch'], 'refs/heads/master'))
+      xcodebuild test \
+        -scheme "$SCHEME" \
+        -destination "id=$SIM_ID"
+    displayName: 'Run iOS Simulator tests (develop/pr)'
+    condition: and(succeeded(), ne(variables['Build.SourceBranch'], 'refs/heads/master'))
 
-- script: |
-    set -euo pipefail
-    SCHEME=$(xcodebuild -list -json | /usr/bin/python3 -c 'import json,sys; d=json.load(sys.stdin); s=d.get("workspace",{}).get("schemes",[]) + d.get("project",{}).get("schemes",[]); pkg=[x for x in s if x.endswith("-Package")]; print(pkg[0] if pkg else (s[0] if s else ""))')
-    if [ -z "$SCHEME" ]; then
-      echo "Unable to determine Xcode scheme for package tests"
-      exit 1
-    fi
+  - script: |
+      set -euo pipefail
+      SCHEME=$(xcodebuild -list -json | /usr/bin/python3 -c 'import json,sys; d=json.load(sys.stdin); s=d.get("workspace",{}).get("schemes",[]) + d.get("project",{}).get("schemes",[]); pkg=[x for x in s if x.endswith("-Package")]; print(pkg[0] if pkg else (s[0] if s else ""))')
+      if [ -z "$SCHEME" ]; then
+        echo "Unable to determine Xcode scheme for package tests"
+        exit 1
+      fi
 
-    SIM_ID=$(xcrun simctl list devices available -j | /usr/bin/python3 -c 'import json,sys; d=json.load(sys.stdin).get("devices",{}); sims=[]
-for runtime, devs in d.items():
-  if "iOS" not in runtime:
-    continue
-  for dev in devs:
-    if dev.get("isAvailable"):
-      name=dev.get("name","")
-      udid=dev.get("udid","")
-      sims.append((0 if name.startswith("iPhone") else 1, name, udid))
-sims.sort(key=lambda x:(x[0], x[1]))
-print(sims[0][2] if sims else "")')
-    if [ -z "$SIM_ID" ]; then
-      echo "Unable to determine an available iOS Simulator device"
-      xcrun simctl list devices
-      exit 1
-    fi
+      SIM_ID=$(xcrun simctl list devices available -j | /usr/bin/python3 -c 'import json,sys; d=json.load(sys.stdin).get("devices",{}); sims=[(0 if dev.get("name","").startswith("iPhone") else 1, dev.get("name",""), dev.get("udid","")) for runtime,devs in d.items() if "iOS" in runtime for dev in devs if dev.get("isAvailable")]; sims.sort(key=lambda x:(x[0],x[1])); print(sims[0][2] if sims else "")')
+      if [ -z "$SIM_ID" ]; then
+        echo "Unable to determine an available iOS Simulator device"
+        xcrun simctl list devices
+        exit 1
+      fi
 
-    RESULT_BUNDLE="$(Build.SourcesDirectory)/test-results/SocketXClientCoverage.xcresult"
-    rm -rf "$RESULT_BUNDLE"
+      RESULT_BUNDLE="$(Build.SourcesDirectory)/test-results/SocketXClientCoverage.xcresult"
+      rm -rf "$RESULT_BUNDLE"
 
-    xcodebuild test \
-      -scheme "$SCHEME" \
-      -destination "id=$SIM_ID" \
-      -enableCodeCoverage YES \
-      -resultBundlePath "$RESULT_BUNDLE"
+      xcodebuild test \
+        -scheme "$SCHEME" \
+        -destination "id=$SIM_ID" \
+        -enableCodeCoverage YES \
+        -resultBundlePath "$RESULT_BUNDLE"
 
-    COVERAGE=$(/usr/bin/xcrun xccov view --report "$RESULT_BUNDLE" | /usr/bin/awk '/^TOTAL/{gsub("%","",$4); print $4}')
-    if [ -z "$COVERAGE" ]; then
-      echo "Unable to parse total coverage from xccov output"
-      exit 1
-    fi
-    export COVERAGE
+      COVERAGE=$(/usr/bin/xcrun xccov view --report "$RESULT_BUNDLE" | /usr/bin/awk '/^TOTAL/{gsub("%","",$4); print $4}')
+      if [ -z "$COVERAGE" ]; then
+        echo "Unable to parse total coverage from xccov output"
+        exit 1
+      fi
+      export COVERAGE
 
-    printf "Total line coverage: %s%%\n" "$COVERAGE"
+      printf "Total line coverage: %s%%\n" "$COVERAGE"
 
-    /usr/bin/python3 - <<'PY'
-import os, sys
-cov = float(os.environ['COVERAGE'])
-thr = float(os.environ['COVERAGE_THRESHOLD'])
-if cov < thr:
-    print(f"Coverage gate failed: {cov:.2f}% < {thr:.2f}%")
-    sys.exit(1)
-print(f"Coverage gate passed: {cov:.2f}% >= {thr:.2f}%")
-PY
-  displayName: 'Run iOS tests with coverage gate (master)'
-  env:
-    COVERAGE_THRESHOLD: $(coverageThreshold)
-  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
+      /usr/bin/python3 - <<'PY'
+      import os, sys
+      cov = float(os.environ['COVERAGE'])
+      thr = float(os.environ['COVERAGE_THRESHOLD'])
+      if cov < thr:
+          print(f"Coverage gate failed: {cov:.2f}% < {thr:.2f}%")
+          sys.exit(1)
+      print(f"Coverage gate passed: {cov:.2f}% >= {thr:.2f}%")
+      PY
+    displayName: 'Run iOS tests with coverage gate (master)'
+    env:
+      COVERAGE_THRESHOLD: $(coverageThreshold)
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
 
-- task: InstallSSHKey@0
-  condition: eq(variables['Build.SourceBranch'], 'refs/heads/master')
-  displayName: 'Install the SSH key'
-  inputs:
-    knownHostsEntry: '$(known_hosts_entry)'
-    sshPublicKey: '$(ado_pk)'
-    sshKeySecureFile: 'id_ed25519'
+  - task: InstallSSHKey@0
+    condition: eq(variables['Build.SourceBranch'], 'refs/heads/master')
+    displayName: 'Install the SSH key'
+    inputs:
+      knownHostsEntry: '$(known_hosts_entry)'
+      sshPublicKey: '$(ado_pk)'
+      sshKeySecureFile: 'id_ed25519'
 
-- task: DeleteFiles@1
-  displayName: 'Delete unnecessary files before push to public remote'
-  condition: and(
-               succeeded(),
-               eq(variables['Build.SourceBranch'], 'refs/heads/master')
-             )
-  inputs:
-    SourceFolder: $(packageDirectory)
-    Contents: |
-      .gitignore
-      **/*.yml
-      dev_docs
-      release.sh
+  - task: DeleteFiles@1
+    displayName: 'Delete unnecessary files before push to public remote'
+    condition: and(
+                 succeeded(),
+                 eq(variables['Build.SourceBranch'], 'refs/heads/master')
+               )
+    inputs:
+      SourceFolder: $(packageDirectory)
+      Contents: |
+        .gitignore
+        **/*.yml
+        dev_docs
+        release.sh
 
-- script: |
-    git add .
-    git commit -am 'Commit unnecessary file deletion'
-  displayName: 'Commit unnecessary file deletion'
-  condition: and(
-               succeeded(),
-               eq(variables['Build.SourceBranch'], 'refs/heads/master')
-             )
-  workingDirectory: $(packageDirectory)
-
-- task: CmdLine@2
-  displayName: 'Push to Public GitHub'
-  condition: and(
-               succeeded(),
-               eq(variables['Build.SourceBranch'], 'refs/heads/master')
-             )
-  inputs:
-    script: |
-      ssh-keyscan -t ed25519 github.com >> ~/.ssh/known_hosts
-      git push git@github.com:Eclypses/$(Build.Repository.Name).git HEAD:refs/heads/public --force  --tags
+  - script: |
+      git add .
+      git commit -am 'Commit unnecessary file deletion'
+    displayName: 'Commit unnecessary file deletion'
+    condition: and(
+                 succeeded(),
+                 eq(variables['Build.SourceBranch'], 'refs/heads/master')
+               )
     workingDirectory: $(packageDirectory)
+
+  - task: CmdLine@2
+    displayName: 'Push to Public GitHub'
+    condition: and(
+                 succeeded(),
+                 eq(variables['Build.SourceBranch'], 'refs/heads/master')
+               )
+    inputs:
+      script: |
+        ssh-keyscan -t ed25519 github.com >> ~/.ssh/known_hosts
+        git push git@github.com:Eclypses/$(Build.Repository.Name).git HEAD:refs/heads/public --force  --tags
+      workingDirectory: $(packageDirectory)
 
