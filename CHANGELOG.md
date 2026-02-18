@@ -14,6 +14,18 @@ All notable changes to this project will be documented in this file.
 -
 
 
+## [2.1.4] - 2026-02-17
+
+### Added
+-
+
+### Changed
+- 
+
+### Fixed
+- Edited release script to run if local is ahead but still block if local is behind remote.
+
+
 ## [2.1.3] - 2026-02-17
 
 ### Added
@@ -144,3 +156,5 @@ All notable changes to this project will be documented in this file.
 [2.1.2]: https://github.com/Eclypses/socketx-client-swift/releases/tag/v2.1.2
 
 [2.1.3]: https://github.com/Eclypses/socketx-client-swift/releases/tag/v2.1.3
+
+[2.1.4]: https://github.com/Eclypses/socketx-client-swift/releases/tag/v2.1.4
