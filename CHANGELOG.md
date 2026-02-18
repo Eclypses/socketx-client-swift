@@ -8,7 +8,7 @@ All notable changes to this project will be documented in this file.
 -
 
 ### Changed
--
+- Edited changelog to test release.sh script
 
 ### Fixed
 -
