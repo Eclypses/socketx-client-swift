@@ -14,6 +14,18 @@ All notable changes to this project will be documented in this file.
 -
 
 
+## [2.1.5] - 2026-02-18
+
+### Added
+-
+
+### Changed
+- Minor update to test for divergent branches.
+
+### Fixed
+-
+
+
 ## [2.1.4] - 2026-02-17
 
 ### Added
@@ -158,3 +170,5 @@ All notable changes to this project will be documented in this file.
 [2.1.3]: https://github.com/Eclypses/socketx-client-swift/releases/tag/v2.1.3
 
 [2.1.4]: https://github.com/Eclypses/socketx-client-swift/releases/tag/v2.1.4
+
+[2.1.5]: https://github.com/Eclypses/socketx-client-swift/releases/tag/v2.1.5
