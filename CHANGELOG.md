@@ -8,7 +8,7 @@ All notable changes to this project will be documented in this file.
 -
 
 ### Changed
--
+- Minor update to test for divergent branches.
 
 ### Fixed
 -
