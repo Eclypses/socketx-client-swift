@@ -34,12 +34,14 @@ BASE_SHA=$(git merge-base HEAD "origin/$TARGET_BRANCH")
 if [ "$LOCAL_SHA" != "$REMOTE_SHA" ]; then
   if [ "$LOCAL_SHA" = "$BASE_SHA" ]; then
     echo "Error: local '$TARGET_BRANCH' is behind origin/$TARGET_BRANCH. Run: git pull --rebase origin $TARGET_BRANCH"
+    exit 1
   elif [ "$REMOTE_SHA" = "$BASE_SHA" ]; then
-    echo "Error: local '$TARGET_BRANCH' is ahead of origin/$TARGET_BRANCH. Push/reconcile first, then rerun release."
+    echo "Info: local '$TARGET_BRANCH' is ahead of origin/$TARGET_BRANCH. Proceeding with release."
+    echo "      Make sure to push both branch and tag after release."
   else
     echo "Error: local '$TARGET_BRANCH' and origin/$TARGET_BRANCH have diverged. Reconcile history before releasing."
+    exit 1
   fi
-  exit 1
 fi
 
 # 1. Validation
