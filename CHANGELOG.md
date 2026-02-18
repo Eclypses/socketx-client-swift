@@ -8,10 +8,10 @@ All notable changes to this project will be documented in this file.
 -
 
 ### Changed
-- Edited changelog to test release.sh script
+- 
 
 ### Fixed
--
+- Edited release script to run if local is ahead but still block if local is behind remote.
 
 
 ## [2.1.3] - 2026-02-17
